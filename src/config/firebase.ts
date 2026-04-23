@@ -15,7 +15,8 @@ if (!admin.apps.length) {
     // 0. Solution ultime : Base64
     if (process.env.FIREBASE_CONFIG_BASE64) {
       try {
-        const cleanBase64 = process.env.FIREBASE_CONFIG_BASE64.replace(/\s/g, '').trim();
+        // Nettoyage radical : on enlève les espaces ET les éventuels guillemets autour
+        const cleanBase64 = process.env.FIREBASE_CONFIG_BASE64.replace(/['"]/g, '').replace(/\s/g, '').trim();
         const decoded = Buffer.from(cleanBase64, 'base64').toString('utf-8');
         try {
           serviceAccount = JSON.parse(decoded);
