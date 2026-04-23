@@ -14,12 +14,12 @@ if (!admin.apps.length) {
     
     // 1. Try to load from JSON string in environment variable (Render/Production)
     if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-      serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+      serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON.trim());
       console.log('✅ Firebase initialized from Environment Variable.');
     } 
     // 2. Try to load from file (Local Development)
     else if (fs.existsSync(absolutePath)) {
-      serviceAccount = JSON.parse(fs.readFileSync(absolutePath, 'utf8'));
+      serviceAccount = JSON.parse(fs.readFileSync(absolutePath, 'utf8').trim());
       console.log('✅ Firebase initialized from Service Account file.');
     }
 
