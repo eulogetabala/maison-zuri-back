@@ -69,12 +69,22 @@ if (!admin.apps.length) {
             const projectIdMatch = content.match(/"project_id":\s*"([\s\S]*?)"/);
             
             if (privateKeyMatch && clientEmailMatch && projectIdMatch) {
+              // Nettoyage agressif de la clé privée
+              let pk = privateKeyMatch[1]
+                .replace(/\\n/g, '\n') // convertir les \n de texte en vrais sauts de ligne
+                .replace(/\n\n+/g, '\n') // supprimer les doubles sauts de ligne
+                .trim();
+              
+              // S'assurer que les en-têtes sont corrects
+              if (!pk.includes('-----BEGIN PRIVATE KEY-----')) pk = '-----BEGIN PRIVATE KEY-----\n' + pk;
+              if (!pk.includes('-----END PRIVATE KEY-----')) pk = pk + '\n-----END PRIVATE KEY-----';
+              
               serviceAccount = {
-                private_key: privateKeyMatch[1].replace(/\\n/g, '\n'),
+                private_key: pk,
                 client_email: clientEmailMatch[1],
                 project_id: projectIdMatch[1]
               };
-              console.log('✅ Successfully repaired and clinical-parsed credentials!');
+              console.log('✅ Successfully repaired and PEM-formatted credentials!');
             } else {
               throw new Error('Repair failed: essential fields not found');
             }
