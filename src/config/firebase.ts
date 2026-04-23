@@ -12,8 +12,18 @@ if (!admin.apps.length) {
   try {
     let serviceAccount;
     
+    // 0. Solution ultime : Base64 (immunisé contre les problèmes de caractères)
+    if (process.env.FIREBASE_CONFIG_BASE64) {
+      try {
+        const decoded = Buffer.from(process.env.FIREBASE_CONFIG_BASE64, 'base64').toString('utf-8');
+        serviceAccount = JSON.parse(decoded);
+        console.log('✅ Firebase initialized from Base64 variable.');
+      } catch (e: any) {
+        console.error('❌ Failed to parse FIREBASE_CONFIG_BASE64:', e.message);
+      }
+    }
     // 1. Try to load from JSON string in environment variable (Render/Production)
-    if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+    else if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
       const rawValue = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
       try {
         const match = rawValue.match(/\{[\s\S]*\}/);
