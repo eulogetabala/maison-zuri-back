@@ -12,22 +12,6 @@ if (!admin.apps.length) {
   try {
     let serviceAccount;
     
-    // Fonction de nettoyage PEM ultra-robuste
-    const fixPrivateKey = (pk: string) => {
-      // On retire TOUS les caractères blancs (espaces, retours à la ligne, tabulations)
-      let raw = pk.replace(/\\n/g, '').replace(/\s/g, '').trim();
-      // On retire les en-têtes s'ils existent déjà
-      raw = raw.replace(/-----BEGINPRIVATEKEY-----/g, '')
-               .replace(/-----ENDPRIVATEKEY-----/g, '')
-               .replace(/-----BEGINRSAPRIVATEKEY-----/g, '')
-               .replace(/-----ENDRSAPRIVATEKEY-----/g, '')
-               .replace(/-/g, ''); // On retire les tirets restants au cas où
-      
-      // Découper le corps de la clé en lignes de 64 caractères (standard PEM)
-      const body = raw.match(/.{1,64}/g)?.join('\n') || raw;
-      return `-----BEGIN PRIVATE KEY-----\n${body}\n-----END PRIVATE KEY-----\n`;
-    };
-
     // 0. Solution ultime : Base64
     if (process.env.FIREBASE_CONFIG_BASE64) {
       try {
@@ -35,7 +19,10 @@ if (!admin.apps.length) {
         const decoded = Buffer.from(cleanBase64, 'base64').toString('utf-8');
         try {
           serviceAccount = JSON.parse(decoded);
-          if (serviceAccount.private_key) serviceAccount.private_key = fixPrivateKey(serviceAccount.private_key);
+          // On s'assure juste que les \n dans la clé sont de vrais sauts de ligne
+          if (serviceAccount.private_key) {
+            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+          }
         } catch (e: any) {
           console.warn('⚠️ JSON parse failed for Base64, attempting Regex extraction...');
           const privateKeyMatch = decoded.match(/"private_key":\s*"([\s\S]*?)"/);
@@ -44,11 +31,11 @@ if (!admin.apps.length) {
           
           if (privateKeyMatch && clientEmailMatch && projectIdMatch) {
             serviceAccount = {
-              private_key: fixPrivateKey(privateKeyMatch[1]),
+              private_key: privateKeyMatch[1].replace(/\\n/g, '\n').replace(/\n\n+/g, '\n'),
               client_email: clientEmailMatch[1],
               project_id: projectIdMatch[1]
             };
-            console.log('✅ Successfully extracted and FIXED credentials via Regex!');
+            console.log('✅ Extracted credentials via Regex.');
           }
         }
       } catch (e: any) {
