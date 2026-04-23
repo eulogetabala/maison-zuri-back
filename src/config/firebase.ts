@@ -10,17 +10,25 @@ const absolutePath = path.resolve(process.cwd(), serviceAccountPath);
 
 if (!admin.apps.length) {
   try {
-    if (fs.existsSync(absolutePath)) {
-      const serviceAccount = JSON.parse(fs.readFileSync(absolutePath, 'utf8'));
+    let serviceAccount;
+    
+    // 1. Try to load from JSON string in environment variable (Render/Production)
+    if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+      serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+      console.log('✅ Firebase initialized from Environment Variable.');
+    } 
+    // 2. Try to load from file (Local Development)
+    else if (fs.existsSync(absolutePath)) {
+      serviceAccount = JSON.parse(fs.readFileSync(absolutePath, 'utf8'));
+      console.log('✅ Firebase initialized from Service Account file.');
+    }
+
+    if (serviceAccount) {
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount)
       });
-      console.log('✅ Firebase Admin initialized successfully.');
     } else {
-      console.warn('⚠️ Firebase Service Account file not found at:', absolutePath);
-      console.warn('Please provide a service account key to enable database functionality.');
-      // Initialize with default or placeholder if needed for local development without DB
-      // admin.initializeApp(); 
+      console.warn('⚠️ No Firebase credentials found. Database will not be available.');
     }
   } catch (error) {
     console.error('❌ Error initializing Firebase Admin:', error);
