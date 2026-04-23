@@ -14,9 +14,15 @@ if (!admin.apps.length) {
     
     // 1. Try to load from JSON string in environment variable (Render/Production)
     if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+      const rawValue = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
       try {
-        serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON.trim());
-        console.log('✅ Firebase initialized from Environment Variable.');
+        const match = rawValue.match(/\{[\s\S]*\}/);
+        if (match) {
+          serviceAccount = JSON.parse(match[0]);
+          console.log('✅ Firebase initialized from Environment Variable (Regex Match).');
+        } else {
+          throw new Error('No JSON object found in variable');
+        }
       } catch (e: any) {
         console.error('❌ Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON:', e.message);
       }
