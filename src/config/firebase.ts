@@ -15,14 +15,17 @@ if (!admin.apps.length) {
     // 0. Solution ultime : Base64 (immunisé contre les problèmes de caractères)
     if (process.env.FIREBASE_CONFIG_BASE64) {
       try {
-        // Nettoyage agressif des espaces/caractères invisibles qui polluent le base64
         const cleanBase64 = process.env.FIREBASE_CONFIG_BASE64.replace(/\s/g, '').trim();
         const decoded = Buffer.from(cleanBase64, 'base64').toString('utf-8');
-        // On s'assure aussi que le contenu décodé est propre (pas de sauts de ligne réels dans les chaînes JSON)
-        const sanitized = decoded.replace(/\n/g, '\\n').replace(/\r/g, '\\r');
-        // Attention : sanitized pourrait casser le JSON global si on ne fait pas gaffe. 
-        // Essayons d'abord le décodage simple après nettoyage du Base64.
-        serviceAccount = JSON.parse(decoded);
+        // On remplace les vrais sauts de ligne par des \n (chaîne de caractères) pour que le JSON soit valide
+        const sanitized = decoded.replace(/\r/g, '').replace(/\n/g, '\\n');
+        
+        try {
+          serviceAccount = JSON.parse(sanitized);
+        } catch (e) {
+          // Si le replace global a cassé le JSON, on tente une approche plus douce
+          serviceAccount = JSON.parse(decoded.replace(/\r?\n/g, ' '));
+        }
         console.log('✅ Firebase initialized from Base64 variable.');
       } catch (e: any) {
         console.error('❌ Failed to parse FIREBASE_CONFIG_BASE64:', e.message);
