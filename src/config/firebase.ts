@@ -28,9 +28,12 @@ if (!admin.apps.length) {
       }
     } 
     // 2. Try to load from file (Local Development)
-    else if (fs.existsSync(absolutePath)) {
-      serviceAccount = JSON.parse(fs.readFileSync(absolutePath, 'utf8').trim());
-      console.log('✅ Firebase initialized from Service Account file.');
+    else {
+      console.log('🔍 Checking for service account file at:', absolutePath);
+      if (fs.existsSync(absolutePath)) {
+        serviceAccount = JSON.parse(fs.readFileSync(absolutePath, 'utf8').trim());
+        console.log('✅ Firebase initialized from Service Account file.');
+      }
     }
 
     if (serviceAccount) {
