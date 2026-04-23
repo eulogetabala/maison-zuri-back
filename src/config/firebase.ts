@@ -69,22 +69,24 @@ if (!admin.apps.length) {
             const projectIdMatch = content.match(/"project_id":\s*"([\s\S]*?)"/);
             
             if (privateKeyMatch && clientEmailMatch && projectIdMatch) {
-              // Nettoyage agressif de la clé privée
-              let pk = privateKeyMatch[1]
-                .replace(/\\n/g, '\n') // convertir les \n de texte en vrais sauts de ligne
-                .replace(/\n\n+/g, '\n') // supprimer les doubles sauts de ligne
-                .trim();
+              // Nettoyage et re-formatage strict
+              let rawKey = privateKeyMatch[1].replace(/\\n/g, '\n').replace(/\n/g, '').trim();
+              // Retirer les headers s'ils sont déjà là pour les remettre proprement
+              rawKey = rawKey.replace('-----BEGIN PRIVATE KEY-----', '').replace('-----END PRIVATE KEY-----', '').trim();
               
-              // S'assurer que les en-têtes sont corrects
-              if (!pk.includes('-----BEGIN PRIVATE KEY-----')) pk = '-----BEGIN PRIVATE KEY-----\n' + pk;
-              if (!pk.includes('-----END PRIVATE KEY-----')) pk = pk + '\n-----END PRIVATE KEY-----';
+              // Découper le corps de la clé en lignes de 64 caractères (standard PEM)
+              const body = rawKey.match(/.{1,64}/g)?.join('\n') || rawKey;
+              const finalPk = `-----BEGIN PRIVATE KEY-----\n${body}\n-----END PRIVATE KEY-----\n`;
+              
+              console.log('🔍 Diagnostic PK (DÉBUT):', finalPk.substring(0, 50));
+              console.log('🔍 Diagnostic PK (FIN):', finalPk.substring(finalPk.length - 50));
               
               serviceAccount = {
-                private_key: pk,
+                private_key: finalPk,
                 client_email: clientEmailMatch[1],
                 project_id: projectIdMatch[1]
               };
-              console.log('✅ Successfully repaired and PEM-formatted credentials!');
+              console.log('✅ Successfully repaired and STRICT-PEM-formatted credentials!');
             } else {
               throw new Error('Repair failed: essential fields not found');
             }
