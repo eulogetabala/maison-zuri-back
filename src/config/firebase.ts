@@ -14,15 +14,10 @@ if (!admin.apps.length) {
     
     // 1. Try to load from JSON string in environment variable (Render/Production)
     if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-      let rawJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON.trim();
-      // Si la chaîne est entourée de guillemets par erreur, on les enlève
-      if (rawJson.startsWith('"') && rawJson.endsWith('"')) {
-        rawJson = rawJson.substring(1, rawJson.length - 1);
-      }
       try {
-        serviceAccount = JSON.parse(rawJson);
+        serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON.trim());
         console.log('✅ Firebase initialized from Environment Variable.');
-      } catch (e) {
+      } catch (e: any) {
         console.error('❌ Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON:', e.message);
       }
     } 
