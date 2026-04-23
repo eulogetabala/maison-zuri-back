@@ -18,6 +18,9 @@ if (!admin.apps.length) {
         const cleanBase64 = process.env.FIREBASE_CONFIG_BASE64.replace(/\s/g, '').trim();
         const decoded = Buffer.from(cleanBase64, 'base64').toString('utf-8');
         
+        console.log('🔍 Diagnostic Decoded (DÉBUT):', decoded.substring(0, 40));
+        console.log('🔍 Diagnostic Decoded (LONGEUR):', decoded.length);
+        
         try {
           serviceAccount = JSON.parse(decoded);
         } catch (e: any) {
