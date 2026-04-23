@@ -17,16 +17,33 @@ if (!admin.apps.length) {
       try {
         const cleanBase64 = process.env.FIREBASE_CONFIG_BASE64.replace(/\s/g, '').trim();
         const decoded = Buffer.from(cleanBase64, 'base64').toString('utf-8');
-        // On remplace les vrais sauts de ligne par des \n (chaîne de caractères) pour que le JSON soit valide
-        const sanitized = decoded.replace(/\r/g, '').replace(/\n/g, '\\n');
         
         try {
-          serviceAccount = JSON.parse(sanitized);
-        } catch (e) {
-          // Si le replace global a cassé le JSON, on tente une approche plus douce
-          serviceAccount = JSON.parse(decoded.replace(/\r?\n/g, ' '));
+          serviceAccount = JSON.parse(decoded);
+        } catch (e: any) {
+          console.warn('⚠️ JSON parse failed for Base64, attempting Regex extraction...');
+          // Extraction par Regex (ne dépend pas de la validité du JSON)
+          const privateKeyMatch = decoded.match(/"private_key":\s*"([\s\S]*?)"/);
+          const clientEmailMatch = decoded.match(/"client_email":\s*"([\s\S]*?)"/);
+          const projectIdMatch = decoded.match(/"project_id":\s*"([\s\S]*?)"/);
+          
+          if (privateKeyMatch && clientEmailMatch && projectIdMatch) {
+            // Nettoyage de la PK extraite
+            let pk = privateKeyMatch[1].replace(/\\n/g, '\n').replace(/\n\n+/g, '\n').trim();
+            if (!pk.includes('-----BEGIN PRIVATE KEY-----')) pk = '-----BEGIN PRIVATE KEY-----\n' + pk;
+            if (!pk.includes('-----END PRIVATE KEY-----')) pk = pk + '\n-----END PRIVATE KEY-----';
+            
+            serviceAccount = {
+              private_key: pk,
+              client_email: clientEmailMatch[1],
+              project_id: projectIdMatch[1]
+            };
+            console.log('✅ Successfully extracted credentials via Regex from Base64!');
+          } else {
+            console.error('❌ Regex extraction failed from Base64. Check your variable content.');
+          }
         }
-        console.log('✅ Firebase initialized from Base64 variable.');
+        if (serviceAccount) console.log('✅ Firebase initialized from Base64 variable.');
       } catch (e: any) {
         console.error('❌ Failed to parse FIREBASE_CONFIG_BASE64:', e.message);
       }
