@@ -14,8 +14,16 @@ if (!admin.apps.length) {
     
     // Fonction de nettoyage PEM ultra-robuste
     const fixPrivateKey = (pk: string) => {
-      let raw = pk.replace(/\\n/g, '\n').replace(/\n/g, '').trim();
-      raw = raw.replace('-----BEGIN PRIVATE KEY-----', '').replace('-----END PRIVATE KEY-----', '').trim();
+      // On retire TOUS les caractères blancs (espaces, retours à la ligne, tabulations)
+      let raw = pk.replace(/\\n/g, '').replace(/\s/g, '').trim();
+      // On retire les en-têtes s'ils existent déjà
+      raw = raw.replace(/-----BEGINPRIVATEKEY-----/g, '')
+               .replace(/-----ENDPRIVATEKEY-----/g, '')
+               .replace(/-----BEGINRSAPRIVATEKEY-----/g, '')
+               .replace(/-----ENDRSAPRIVATEKEY-----/g, '')
+               .replace(/-/g, ''); // On retire les tirets restants au cas où
+      
+      // Découper le corps de la clé en lignes de 64 caractères (standard PEM)
       const body = raw.match(/.{1,64}/g)?.join('\n') || raw;
       return `-----BEGIN PRIVATE KEY-----\n${body}\n-----END PRIVATE KEY-----\n`;
     };
