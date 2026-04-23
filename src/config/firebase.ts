@@ -27,12 +27,28 @@ if (!admin.apps.length) {
         console.error('❌ Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON:', e.message);
       }
     } 
-    // 2. Try to load from file (Local Development)
+    // 2. Try to load from file
     else {
-      console.log('🔍 Checking for service account file at:', absolutePath);
-      if (fs.existsSync(absolutePath)) {
-        serviceAccount = JSON.parse(fs.readFileSync(absolutePath, 'utf8').trim());
-        console.log('✅ Firebase initialized from Service Account file.');
+      const PROJECT_PATH = path.resolve(process.cwd(), './serviceAccountKey.json');
+      const RENDER_SECRETS_PATH = '/etc/secrets/serviceAccountKey.json';
+      const customPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH ? path.resolve(process.cwd(), process.env.FIREBASE_SERVICE_ACCOUNT_PATH) : null;
+      
+      let filePath = null;
+      if (customPath && fs.existsSync(customPath)) filePath = customPath;
+      else if (fs.existsSync(PROJECT_PATH)) filePath = PROJECT_PATH;
+      else if (fs.existsSync(RENDER_SECRETS_PATH)) filePath = RENDER_SECRETS_PATH;
+
+      if (filePath) {
+        console.log('✅ Found service account file at:', filePath);
+        serviceAccount = JSON.parse(fs.readFileSync(filePath, 'utf8').trim());
+      } else {
+        console.warn('⚠️ Service account file NOT found in standard locations.');
+        try {
+          console.log('📁 Project Root files:', fs.readdirSync(process.cwd()));
+          if (fs.existsSync('/etc/secrets')) {
+            console.log('📁 Render Secrets files:', fs.readdirSync('/etc/secrets'));
+          }
+        } catch (e) {}
       }
     }
 
