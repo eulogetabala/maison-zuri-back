@@ -15,11 +15,10 @@ interface SMSPayload {
  * Envoie un SMS transactionnel via l'API Brevo (v3)
  */
 export async function sendSMS({ to, sender, content }: SMSPayload) {
-  if (!BREVO_API_KEY) {
-    console.warn('⚠️ BREVO_API_KEY non configurée. SMS non envoyé:', content);
-    return;
-  }
-
+  // Désactivation temporaire de Brevo (pas de crédits)
+  console.log('📱 [SMS MOCK] Vers:', to, '| Contenu:', content);
+  return;
+  /*
   try {
     const response = await fetch('https://api.brevo.com/v3/transactionalSMS/sms', {
       method: 'POST',
@@ -46,4 +45,5 @@ export async function sendSMS({ to, sender, content }: SMSPayload) {
   } catch (error) {
     console.error('❌ Erreur lors de l\'envoi du SMS:', error);
   }
+  */
 }
