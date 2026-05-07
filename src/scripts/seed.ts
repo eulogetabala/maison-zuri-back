@@ -10,8 +10,18 @@ const categories = [
 ];
 
 const products = [
-  { name: 'Sac Iconique "Zuri" Noir', price: 320000, description: 'Le fleuron de notre collection. Un cuir d\'exception pour une allure intemporelle.', category: 'best-sellers', image: '/29.png', gallery: ['/29.png', '/30.jpg'] },
+  { 
+    name: 'Sac Iconique "Zuri" Noir', 
+    price: 320000, 
+    discountPrice: 250000,
+    description: 'Le fleuron de notre collection. Un cuir d\'exception pour une allure intemporelle.', 
+    category: 'best-sellers', 
+    image: '/29.png', 
+    gallery: ['/29.png', '/30.jpg', '/27.jpg', '/28.jpg'] 
+  },
+  { name: 'Sac Iconique "Zuri" Rouge', price: 320000, description: 'Le fleuron de notre collection dans une robe rouge passion éclatante.', category: 'best-sellers', image: '/34.jpg', gallery: ['/34.jpg'] },
   { name: 'Saffiano "Atelier" Camel', price: 285000, description: 'Structure rigide et finitions dorées pour ce sac à main sophistiqué.', category: 'sacs-a-main', image: '/28.jpg', gallery: ['/28.jpg', '/27.jpg'] },
+  { name: 'Saffiano "Atelier" Noir', price: 285000, description: 'L\'élégance absolue du noir sur un cuir Saffiano de premier choix.', category: 'sacs-a-main', image: '/21.jpg', gallery: ['/21.jpg'] },
   { name: 'Pochette "Belle de Nuit"', price: 95000, description: 'Une touche d\'éclat pour vos soirées les plus mémorables.', category: 'pochettes', image: '/17.jpg', gallery: ['/17.jpg'] },
   { name: 'Besace "Nomade" Olive', price: 175000, description: 'Le compagnon parfait pour une journée active tout en restant chic.', category: 'sacs-bandouliere', image: '/10.jpg', gallery: ['/10.jpg'] },
   { name: 'Grand Cabas "Horizon"', price: 245000, description: 'Volume généreux et cuir souple pour vos escapades ou vos journées chargées.', category: 'cabas-voyage', image: '/34.jpg', gallery: ['/34.jpg'] },

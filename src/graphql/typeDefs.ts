@@ -19,6 +19,9 @@ export const typeDefs = `#graphql
     category: String
     image: String
     gallery: [String]
+    video: String
+    discountPrice: Float
+    createdAt: String
   }
 
   type User {
@@ -34,15 +37,24 @@ export const typeDefs = `#graphql
   }
 
   type SalesData {
-    date: String
-    amount: Float
+    date: String!
+    amount: Float!
+  }
+
+  type CountryStat {
+    country: String!
+    count: Int!
+    revenue: Float!
+    code: String!
   }
 
   type AdminStats {
-    totalRevenue: Float
-    ordersCount: Int
-    productsCount: Int
-    salesChart: [SalesData]
+    totalRevenue: Float!
+    ordersCount: Int!
+    productsCount: Int!
+    averageOrderValue: Float!
+    salesChart: [SalesData!]!
+    countryStats: [CountryStat!]!
   }
 
   type Query {
@@ -81,6 +93,8 @@ export const typeDefs = `#graphql
     category: String
     image: String
     gallery: [String]
+    video: String
+    discountPrice: Float
   }
 
   input OrderInput {
